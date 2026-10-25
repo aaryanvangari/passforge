@@ -60,10 +60,16 @@ Thumbs.db
 .contextProperties.ini
 
 # ------------------------------------------------------------------
-# Debian packaging
+# Debian packaging build artifacts
 # ------------------------------------------------------------------
 /build/
 /build-deb/
 /package-root/
 /debian/files
 /contents/ui/OpenSquares/PassForge/*.so
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/*.substvars
+/debian/passforge/
+/debian/tmp/
+/obj-*/
