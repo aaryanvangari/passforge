@@ -65,4 +65,5 @@ Thumbs.db
 /build/
 /build-deb/
 /package-root/
+/debian/files
 /contents/ui/OpenSquares/PassForge/*.so
