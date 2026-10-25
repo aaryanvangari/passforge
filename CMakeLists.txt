@@ -2,12 +2,52 @@ cmake_minimum_required(VERSION 3.21)
 
 project(PassForge LANGUAGES CXX)
 
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_MODULE_PATH})
+
+find_package(Plasma REQUIRED)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Qml)
 
 qt_standard_project_setup()
+
+set(KDE_INSTALL_USE_QT_SYS_PATHS TRUE)
+include(KDEInstallDirs6)
+
+set(PASSFORGE_QML_INSTALL_DIR "${KDE_INSTALL_QMLDIR}")
+
+set(PASSFORGE_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/package")
+
+file(MAKE_DIRECTORY "${PASSFORGE_PACKAGE_DIR}/contents")
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/metadata.json"
+    "${PASSFORGE_PACKAGE_DIR}/metadata.json"
+    COPYONLY
+)
+
+file(GLOB PASSFORGE_UI_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/*.qml"
+    "${CMAKE_CURRENT_SOURCE_DIR}/contents/ui/*.js"
+)
+
+file(COPY ${PASSFORGE_UI_FILES}
+    DESTINATION "${PASSFORGE_PACKAGE_DIR}/contents/ui"
+)
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/contents/screenshot.png"
+    "${PASSFORGE_PACKAGE_DIR}/contents/screenshot.png"
+    COPYONLY
+)
+
+plasma_install_package(
+    "${PASSFORGE_PACKAGE_DIR}"
+    "com.opensquares.passforge"
+)
 
 qt_policy(SET QTP0001 OLD)
 
@@ -37,22 +77,17 @@ set_target_properties(passforgeplugin PROPERTIES
 
 install(
     TARGETS passforge
-    LIBRARY DESTINATION contents/ui/OpenSquares/PassForge
+    LIBRARY DESTINATION "${PASSFORGE_QML_INSTALL_DIR}/OpenSquares/PassForge"
 )
 
 install(
     TARGETS passforgeplugin
-    LIBRARY DESTINATION contents/ui/OpenSquares/PassForge
-)
-
-install(
-    FILES contents/screenshot.png
-    DESTINATION contents
+    LIBRARY DESTINATION "${PASSFORGE_QML_INSTALL_DIR}/OpenSquares/PassForge"
 )
 
 install(
     DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/contents/ui/OpenSquares/PassForge/"
-    DESTINATION contents/ui/OpenSquares/PassForge
+    DESTINATION "${PASSFORGE_QML_INSTALL_DIR}/OpenSquares/PassForge"
     FILES_MATCHING
         PATTERN "qmldir"
         PATTERN "*.qmltypes"
