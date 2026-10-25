@@ -2,7 +2,8 @@
     "KPlugin": {
         "Authors": [
             {
-                "Name": "Aaryan Vangari"
+                "Name": "Aaryan Vangari",
+                "Email": "aaryanvangari@gmail.com"
             }
         ],
         "Category": "Utilities",
@@ -11,7 +12,9 @@
         "Id": "com.opensquares.passforge",
         "Name": "PassForge",
         "Version": "1.0.0",
-        "License": "GPL-3.0-or-later"
+        "License": "GPL-3.0-or-later",
+        "Website": "https://passforge.opensquares.in",
+        "BugReportUrl": "https://github.com/aaryanvangari/passforge/issues"
     },
     "KPackageStructure": "Plasma/Applet",
     "X-Plasma-API-Minimum-Version": "6.0"
