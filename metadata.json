@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Aaryan Vangari"
+            }
+        ],
+        "Category": "Utilities",
+        "Description": "Secure Password & Passphrase Generator",
+        "Icon": "password-generate-symbolic",
+        "Id": "com.opensquares.passforge",
+        "Name": "PassForge",
+        "Version": "1.0.0",
+        "License": "GPL-3.0-or-later"
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
