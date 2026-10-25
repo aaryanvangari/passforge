@@ -58,3 +58,11 @@ Thumbs.db
 # QML language-server configuration
 # ------------------------------------------------------------------
 .contextProperties.ini
+
+# ------------------------------------------------------------------
+# Debian packaging
+# ------------------------------------------------------------------
+/build/
+/build-deb/
+/package-root/
+/contents/ui/OpenSquares/PassForge/*.so
