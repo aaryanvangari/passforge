@@ -3,10 +3,45 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
     <kcfgfile name=""/>
+
     <group name="General">
-        <entry name="wordCount" type="Int"><default>5</default></entry>
-        <entry name="includeCapitals" type="Bool"><default>true</default></entry>
-        <entry name="includeNumbers" type="Bool"><default>true</default></entry>
-        <entry name="separator" type="String"><default>-</default></entry>
+
+        <!-- Password generator -->
+        <entry name="passwordLength" type="Int">
+            <default>16</default>
+        </entry>
+        <entry name="includeUppercase" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="includeLowercase" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="includeDigits" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="includeSpecialCharacters" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="minimumNumbers" type="Int">
+            <default>1</default>
+        </entry>
+        <entry name="minimumSpecialCharacters" type="Int">
+            <default>1</default>
+        </entry>
+
+        <!-- Passphrase generator -->
+        <entry name="wordCount" type="Int">
+            <default>5</default>
+        </entry>
+        <entry name="includeCapitals" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="includeNumbers" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="separator" type="String">
+            <default>-</default>
+        </entry>
+
     </group>
 </kcfg>
