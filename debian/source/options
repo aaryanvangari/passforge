@@ -1,1 +1,0 @@
-extend-diff-ignore = "^(build|build-deb|package-root|share|contents/ui/OpenSquares/PassForge)/|^\.contextProperties\.ini$"
