@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import org.kde.kquickcontrols
 
 Kirigami.FormLayout {
     id: page
@@ -21,6 +22,12 @@ Kirigami.FormLayout {
 
     property int cfg_minimumNumbers: 1
     property int cfg_minimumSpecialCharacters: 1
+
+    // Password strength indicator
+    property color cfg_veryWeakColor: "#e53935"
+    property color cfg_weakColor: "#fb8c00"
+    property color cfg_moderateColor: "#fdd835"
+    property color cfg_strongColor: "#43a047"
 
     // --------------------------------------------------
     // Password generator
@@ -125,5 +132,38 @@ Kirigami.FormLayout {
 
         Component.onCompleted: currentIndex = indexOfValue(page.cfg_separator)
         onActivated: page.cfg_separator = currentValue
+    }
+
+    // --------------------------------------------------
+    // Password strength indicator
+    // --------------------------------------------------
+
+    Kirigami.Separator {
+        Kirigami.FormData.isSection: true
+        Kirigami.FormData.label: i18n("Password strength indicator")
+    }
+
+    ColorButton {
+        Kirigami.FormData.label: i18n("Very weak:")
+        color: page.cfg_veryWeakColor
+        onColorChanged: page.cfg_veryWeakColor = color
+    }
+
+    ColorButton {
+        Kirigami.FormData.label: i18n("Weak:")
+        color: page.cfg_weakColor
+        onColorChanged: page.cfg_weakColor = color
+    }
+
+    ColorButton {
+        Kirigami.FormData.label: i18n("Moderate:")
+        color: page.cfg_moderateColor
+        onColorChanged: page.cfg_moderateColor = color
+    }
+
+    ColorButton {
+        Kirigami.FormData.label: i18n("Strong:")
+        color: page.cfg_strongColor
+        onColorChanged: page.cfg_strongColor = color
     }
 }

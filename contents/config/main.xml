@@ -43,5 +43,19 @@
             <default>-</default>
         </entry>
 
+        <!-- Password strength indicator -->
+        <entry name="veryWeakColor" type="Color">
+            <default>#e53935</default>
+        </entry>
+        <entry name="weakColor" type="Color">
+            <default>#fb8c00</default>
+        </entry>
+        <entry name="moderateColor" type="Color">
+            <default>#fdd835</default>
+        </entry>
+        <entry name="strongColor" type="Color">
+            <default>#43a047</default>
+        </entry>
+
     </group>
 </kcfg>

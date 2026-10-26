@@ -30,10 +30,10 @@ Item {
         )
 
     readonly property color strengthColor:
-        entropy < 40 ? "#e53935"
-        : entropy < 60 ? "#fb8c00"
-        : entropy < 80 ? "#fdd835"
-        : "#43a047"
+        entropy < 40 ? configuration.veryWeakColor
+        : entropy < 60 ? configuration.weakColor
+        : entropy < 80 ? configuration.moderateColor
+        : configuration.strongColor
 
     readonly property string strength:
         entropy < 40 ? i18n("Weak")
