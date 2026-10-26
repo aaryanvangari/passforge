@@ -1,3 +1,9 @@
+passforge (1.0.0-5) unstable; urgency=medium
+
+  * Scrollable settings page.
+
+ -- Aaryan Vangari <aaryanvangari@gmail.com>  Mon, 27 Oct 2026 12:55:00 +0530
+
 passforge (1.0.0-4) unstable; urgency=medium
 
   * Add configurable password strength indicator colors.
