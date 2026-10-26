@@ -17,7 +17,11 @@ qt_standard_project_setup()
 set(KDE_INSTALL_USE_QT_SYS_PATHS TRUE)
 include(KDEInstallDirs6)
 
-set(PASSFORGE_QML_INSTALL_DIR "${KDE_INSTALL_QMLDIR}")
+if(CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+    set(PASSFORGE_QML_INSTALL_DIR "${KDE_INSTALL_QMLDIR}")
+else()
+    set(PASSFORGE_QML_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}${KDE_INSTALL_QMLDIR}")
+endif()
 
 set(PASSFORGE_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/package")
 
@@ -42,6 +46,16 @@ configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/contents/screenshot.png"
     "${PASSFORGE_PACKAGE_DIR}/contents/screenshot.png"
     COPYONLY
+)
+
+file(COPY
+    "${CMAKE_CURRENT_SOURCE_DIR}/contents/screenshots"
+    DESTINATION "${PASSFORGE_PACKAGE_DIR}/contents"
+)
+
+file(COPY
+    "${CMAKE_CURRENT_SOURCE_DIR}/contents/config"
+    DESTINATION "${PASSFORGE_PACKAGE_DIR}/contents"
 )
 
 plasma_install_package(

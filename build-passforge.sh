@@ -11,7 +11,7 @@ echo "PROJECT_DIR: "$PROJECT_DIR
 echo "BUILD_DIR: "$BUILD_DIR
 
 echo "Configuring PassForge..."
-cmake -S "$PROJECT_DIR" -B "$BUILD_DIR"
+cmake -S "$PROJECT_DIR" -B "$BUILD_DIR" -DCMAKE_INSTALL_PREFIX="$BUILD_DIR/dev-install"
 
 echo
 echo "Building PassForge..."
@@ -19,7 +19,7 @@ cmake --build "$BUILD_DIR"
 
 echo
 echo "Installing PassForge QML module..."
-cmake --install "$BUILD_DIR" --prefix "$PROJECT_DIR"
+cmake --install "$BUILD_DIR"
 
 echo
 echo "PassForge build and installation completed successfully."
