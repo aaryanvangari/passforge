@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
-
 
 PROJECT_DIR = Path(__file__).resolve().parent
 RELEASE_DIR = PROJECT_DIR / "release"
@@ -49,7 +50,6 @@ def require_commands() -> None:
         "dpkg-parsechangelog",
         "dpkg-architecture",
         "dpkg-deb",
-        "sha256sum",
     )
     missing = [name for name in commands if shutil.which(name) is None]
     if missing:
@@ -57,18 +57,9 @@ def require_commands() -> None:
 
 
 def get_package_metadata() -> tuple[str, str, str]:
-    source = run(
-        ["dpkg-parsechangelog", "--show-field", "Source"],
-        capture=True,
-    )
-    version = run(
-        ["dpkg-parsechangelog", "--show-field", "Version"],
-        capture=True,
-    )
-    architecture = run(
-        ["dpkg-architecture", "-qDEB_HOST_ARCH"],
-        capture=True,
-    )
+    source = run(["dpkg-parsechangelog", "--show-field", "Source"], capture=True)
+    version = run(["dpkg-parsechangelog", "--show-field", "Version"], capture=True)
+    architecture = run(["dpkg-architecture", "-qDEB_HOST_ARCH"], capture=True)
 
     if source != PACKAGE_NAME:
         raise ReleaseError(
@@ -93,8 +84,7 @@ def check_git_worktree() -> str:
             "changes before releasing:\n" + status
         )
 
-    commit = run(["git", "rev-parse", "--short", "HEAD"], capture=True)
-    return commit
+    return run(["git", "rev-parse", "--short", "HEAD"], capture=True)
 
 
 def package_control_field(package_file: Path, field: str) -> str:
@@ -159,6 +149,91 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def write_temp_file(directory: Path, prefix: str, content: str) -> Path:
+    """Write and flush a temporary text file in the destination directory."""
+    fd, name = tempfile.mkstemp(prefix=prefix, dir=directory)
+    path = Path(name)
+
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
+            file.write(content)
+            file.flush()
+            os.fsync(file.fileno())
+    except Exception:
+        path.unlink(missing_ok=True)
+        raise
+
+    return path
+
+
+def archive_release(
+    build_output: Path,
+    release_package: Path,
+    checksum: str,
+) -> Path:
+    """Publish package and checksum without overwriting existing release files."""
+    RELEASE_DIR.mkdir(parents=True, exist_ok=True)
+
+    checksum_file = release_package.with_suffix(
+        release_package.suffix + ".sha256"
+    )
+
+    existing = [
+        path for path in (release_package, checksum_file) if path.exists()
+    ]
+    if existing:
+        raise ReleaseError(
+            "Refusing to overwrite existing release file(s):\n  "
+            + "\n  ".join(str(path) for path in existing)
+        )
+
+    package_temp: Path | None = None
+    checksum_temp: Path | None = None
+    package_published = False
+
+    try:
+        fd, name = tempfile.mkstemp(
+            prefix=f".{release_package.name}.",
+            suffix=".tmp",
+            dir=RELEASE_DIR,
+        )
+        os.close(fd)
+        package_temp = Path(name)
+        shutil.copy2(build_output, package_temp)
+
+        with package_temp.open("rb") as file:
+            os.fsync(file.fileno())
+
+        checksum_temp = write_temp_file(
+            RELEASE_DIR,
+            f".{checksum_file.name}.",
+            f"{checksum}  {release_package.name}\n",
+        )
+
+        # Hard links publish atomically and fail if the destination exists.
+        os.link(package_temp, release_package)
+        package_published = True
+        os.link(checksum_temp, checksum_file)
+
+    except FileExistsError as exc:
+        raise ReleaseError(
+            "A release file appeared during publication. Nothing was overwritten."
+        ) from exc
+    except OSError as exc:
+        raise ReleaseError(f"Could not archive release: {exc}") from exc
+    finally:
+        if package_temp is not None:
+            package_temp.unlink(missing_ok=True)
+        if checksum_temp is not None:
+            checksum_temp.unlink(missing_ok=True)
+
+        # Roll back the package if checksum publication did not complete.
+        if package_published and not checksum_file.exists():
+            release_package.unlink(missing_ok=True)
+
+    return checksum_file
+
+
 def main() -> int:
     print("PassForge Debian release")
     print(f"Repository: {PROJECT_DIR}")
@@ -167,17 +242,24 @@ def main() -> int:
 
     commit = check_git_worktree()
     package, version, architecture = get_package_metadata()
+
     filename = f"{package}_{version}_{architecture}.deb"
     build_output = PROJECT_DIR.parent / filename
     release_package = RELEASE_DIR / filename
+    checksum_file = release_package.with_suffix(
+        release_package.suffix + ".sha256"
+    )
 
     print(f"Git commit: {commit}")
     print(f"Package:    {filename}")
 
-    if release_package.exists():
+    existing = [
+        path for path in (release_package, checksum_file) if path.exists()
+    ]
+    if existing:
         raise ReleaseError(
-            f"Release already exists: {release_package}\n"
-            "Refusing to overwrite a previously archived package."
+            "Release already exists; refusing to overwrite:\n  "
+            + "\n  ".join(str(path) for path in existing)
         )
 
     if build_output.exists():
@@ -193,21 +275,23 @@ def main() -> int:
     run(["dpkg-buildpackage", "-us", "-uc", "-b"])
 
     if not build_output.is_file():
-        raise ReleaseError(f"Expected build output was not created: {build_output}")
+        raise ReleaseError(
+            f"Expected build output was not created: {build_output}"
+        )
 
     print("\nVerifying generated package...")
     verify_package(build_output, version, architecture)
 
-    RELEASE_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(build_output, release_package)
-
-    checksum = sha256_file(release_package)
-    checksum_file = release_package.with_suffix(release_package.suffix + ".sha256")
-    checksum_file.write_text(f"{checksum}  {release_package.name}\n", encoding="utf-8")
+    checksum = sha256_file(build_output)
+    archived_checksum = archive_release(
+        build_output,
+        release_package,
+        checksum,
+    )
 
     print("\nRelease completed successfully.")
     print(f"  Package:  {release_package}")
-    print(f"  SHA-256:  {checksum_file}")
+    print(f"  SHA-256:  {archived_checksum}")
     print(f"  Checksum: {checksum}")
 
     return 0
