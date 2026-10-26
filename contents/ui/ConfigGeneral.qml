@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
+import org.kde.plasma.configuration
 import org.kde.kirigami as Kirigami
 import org.kde.kquickcontrols
 
-Kirigami.FormLayout {
+Kirigami.ScrollablePage {
     id: page
 
     // Passphrase settings
@@ -29,141 +30,139 @@ Kirigami.FormLayout {
     property color cfg_moderateColor: "#fdd835"
     property color cfg_strongColor: "#43a047"
 
-    // --------------------------------------------------
-    // Password generator
-    // --------------------------------------------------
+    ColumnLayout {
+        anchors {
+            left: parent.left
+            top: parent.top
+            right: parent.right
+        }
 
-    Kirigami.Separator {
-        Kirigami.FormData.isSection: true
-        Kirigami.FormData.label: i18n("Password generator")
-    }
+        Kirigami.FormLayout {
+            // Password generator
+            Kirigami.Separator {
+                Kirigami.FormData.isSection: true
+                Kirigami.FormData.label: i18n("Password generator")
+            }
 
-    QQC2.SpinBox {
-        id: passwordLength
-        Kirigami.FormData.label: i18n("Password length:")
-        from: 5
-        to: 128
-    }
+            QQC2.SpinBox {
+                id: passwordLength
+                Kirigami.FormData.label: i18n("Password length:")
+                from: 5
+                to: 128
+            }
 
-    QQC2.CheckBox {
-        id: uppercase
-        Kirigami.FormData.label: i18n("Uppercase letters:")
-        text: "A-Z"
-    }
+            QQC2.CheckBox {
+                id: uppercase
+                Kirigami.FormData.label: i18n("Uppercase letters:")
+                text: "A-Z"
+            }
 
-    QQC2.CheckBox {
-        id: lowercase
-        Kirigami.FormData.label: i18n("Lowercase letters:")
-        text: "a-z"
-    }
+            QQC2.CheckBox {
+                id: lowercase
+                Kirigami.FormData.label: i18n("Lowercase letters:")
+                text: "a-z"
+            }
 
-    QQC2.CheckBox {
-        id: digits
-        Kirigami.FormData.label: i18n("Numbers:")
-        text: "0-9"
-    }
+            QQC2.CheckBox {
+                id: digits
+                Kirigami.FormData.label: i18n("Numbers:")
+                text: "0-9"
+            }
 
-    QQC2.ComboBox {
-        id: minimumNumbers
-        Kirigami.FormData.label: i18n("Minimum numbers:")
-        enabled: digits.checked
-        model: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+            QQC2.ComboBox {
+                id: minimumNumbers
+                Kirigami.FormData.label: i18n("Minimum numbers:")
+                enabled: digits.checked
+                model: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                Component.onCompleted: currentIndex = page.cfg_minimumNumbers - 1
+                onActivated: page.cfg_minimumNumbers = currentIndex + 1
+            }
 
-        Component.onCompleted: currentIndex = page.cfg_minimumNumbers - 1
-        onActivated: page.cfg_minimumNumbers = currentIndex + 1
-    }
+            QQC2.CheckBox {
+                id: specialCharacters
+                Kirigami.FormData.label: i18n("Special characters:")
+                text: "!@#$%^&*"
+            }
 
-    QQC2.CheckBox {
-        id: specialCharacters
-        Kirigami.FormData.label: i18n("Special characters:")
-        text: "!@#$%^&*"
-    }
+            QQC2.ComboBox {
+                id: minimumSpecialCharacters
+                Kirigami.FormData.label: i18n("Minimum special characters:")
+                enabled: specialCharacters.checked
+                model: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                Component.onCompleted: currentIndex = page.cfg_minimumSpecialCharacters - 1
+                onActivated: page.cfg_minimumSpecialCharacters = currentIndex + 1
+            }
 
-    QQC2.ComboBox {
-        id: minimumSpecialCharacters
-        Kirigami.FormData.label: i18n("Minimum special characters:")
-        enabled: specialCharacters.checked
-        model: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+            // Passphrase generator
+            Kirigami.Separator {
+                Kirigami.FormData.isSection: true
+                Kirigami.FormData.label: i18n("Passphrase generator")
+            }
 
-        Component.onCompleted: currentIndex = page.cfg_minimumSpecialCharacters - 1
-        onActivated: page.cfg_minimumSpecialCharacters = currentIndex + 1
-    }
+            QQC2.SpinBox {
+                id: wordCount
+                Kirigami.FormData.label: i18n("Number of words:")
+                from: 2
+                to: 12
+            }
 
-    // --------------------------------------------------
-    // Passphrase generator
-    // --------------------------------------------------
+            QQC2.CheckBox {
+                id: capitals
+                Kirigami.FormData.label: i18n("Capital letters:")
+                text: i18n("Capitalise words")
+            }
 
-    Kirigami.Separator {
-        Kirigami.FormData.isSection: true
-        Kirigami.FormData.label: i18n("Passphrase generator")
-    }
+            QQC2.CheckBox {
+                id: numbers
+                Kirigami.FormData.label: i18n("Numbers:")
+                text: i18n("Append random digits")
+            }
 
-    QQC2.SpinBox {
-        id: wordCount
-        Kirigami.FormData.label: i18n("Number of words:")
-        from: 2
-        to: 12
-    }
+            QQC2.ComboBox {
+                id: separator
+                Kirigami.FormData.label: i18n("Separator:")
+                textRole: "label"
+                valueRole: "value"
+                model: [
+                    { label: i18n("Hyphen (-)"), value: "-" },
+                    { label: i18n("Underscore (_)"), value: "_" },
+                    { label: i18n("Period (.)"), value: "." },
+                    { label: i18n("Space"), value: " " },
+                    { label: i18n("No separator"), value: "" }
+                ]
+                Component.onCompleted: currentIndex = indexOfValue(page.cfg_separator)
+                onActivated: page.cfg_separator = currentValue
+            }
 
-    QQC2.CheckBox {
-        id: capitals
-        Kirigami.FormData.label: i18n("Capital letters:")
-        text: i18n("Capitalise words")
-    }
+            // Password strength indicator
+            Kirigami.Separator {
+                Kirigami.FormData.isSection: true
+                Kirigami.FormData.label: i18n("Password strength indicator")
+            }
 
-    QQC2.CheckBox {
-        id: numbers
-        Kirigami.FormData.label: i18n("Numbers:")
-        text: i18n("Append random digits")
-    }
+            ColorButton {
+                Kirigami.FormData.label: i18n("Very weak:")
+                color: page.cfg_veryWeakColor
+                onColorChanged: page.cfg_veryWeakColor = color
+            }
 
-    QQC2.ComboBox {
-        id: separator
-        Kirigami.FormData.label: i18n("Separator:")
-        textRole: "label"
-        valueRole: "value"
-        model: [
-            { label: i18n("Hyphen (-)"), value: "-" },
-            { label: i18n("Underscore (_)"), value: "_" },
-            { label: i18n("Period (.)"), value: "." },
-            { label: i18n("Space"), value: " " },
-            { label: i18n("No separator"), value: "" }
-        ]
+            ColorButton {
+                Kirigami.FormData.label: i18n("Weak:")
+                color: page.cfg_weakColor
+                onColorChanged: page.cfg_weakColor = color
+            }
 
-        Component.onCompleted: currentIndex = indexOfValue(page.cfg_separator)
-        onActivated: page.cfg_separator = currentValue
-    }
+            ColorButton {
+                Kirigami.FormData.label: i18n("Moderate:")
+                color: page.cfg_moderateColor
+                onColorChanged: page.cfg_moderateColor = color
+            }
 
-    // --------------------------------------------------
-    // Password strength indicator
-    // --------------------------------------------------
-
-    Kirigami.Separator {
-        Kirigami.FormData.isSection: true
-        Kirigami.FormData.label: i18n("Password strength indicator")
-    }
-
-    ColorButton {
-        Kirigami.FormData.label: i18n("Very weak:")
-        color: page.cfg_veryWeakColor
-        onColorChanged: page.cfg_veryWeakColor = color
-    }
-
-    ColorButton {
-        Kirigami.FormData.label: i18n("Weak:")
-        color: page.cfg_weakColor
-        onColorChanged: page.cfg_weakColor = color
-    }
-
-    ColorButton {
-        Kirigami.FormData.label: i18n("Moderate:")
-        color: page.cfg_moderateColor
-        onColorChanged: page.cfg_moderateColor = color
-    }
-
-    ColorButton {
-        Kirigami.FormData.label: i18n("Strong:")
-        color: page.cfg_strongColor
-        onColorChanged: page.cfg_strongColor = color
+            ColorButton {
+                Kirigami.FormData.label: i18n("Strong:")
+                color: page.cfg_strongColor
+                onColorChanged: page.cfg_strongColor = color
+            }
+        }
     }
 }
