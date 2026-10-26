@@ -45,8 +45,8 @@ PlasmoidItem {
 
         Layout.minimumWidth: 360
         Layout.preferredWidth: 400
-        Layout.minimumHeight: 750
-        Layout.preferredHeight: 900
+        Layout.minimumHeight: 650
+        Layout.preferredHeight: 800
 
         ColumnLayout {
             anchors.fill: parent
