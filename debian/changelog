@@ -1,3 +1,10 @@
+passforge (1.0.0-2) unstable; urgency=medium
+
+  * Include applet configuration files and additional screenshots.
+  * Fix development installation paths and packaging workflow.
+
+ -- Aaryan Vangari <aaryanvangari@gmail.com>  Mon, 26 Oct 2026 16:34:00 +0530
+ 
 passforge (1.0.0-1) unstable; urgency=medium
 
   * Initial Debian package release.
