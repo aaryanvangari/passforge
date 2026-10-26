@@ -267,7 +267,7 @@ Item {
                 }
             
                 QQC2.CheckBox {
-                    text: i18n("Special characters (!@#$%^&*)")
+                    text: i18n("Specials (!@#$%^&*)")
                     checked: root.configuration ? root.configuration.includeSpecialCharacters : true
             
                     onToggled: {
