@@ -35,6 +35,7 @@ jobs:
       - name: Verify tag matches Debian package version
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TAG_VERSION="${TAG_VERSION/-test/~test}"
           PACKAGE_VERSION="$(dpkg-parsechangelog -S Version)"
 
           echo "Git tag version: $TAG_VERSION"
@@ -60,7 +61,7 @@ jobs:
         run: |
           RELEASE_ARGS=()
 
-          if [[ "$GITHUB_REF_NAME" == *"~test"* ]]; then
+          if [[ "$GITHUB_REF_NAME" == *"-test"* ]]; then
             RELEASE_ARGS+=(--prerelease)
           fi
 
