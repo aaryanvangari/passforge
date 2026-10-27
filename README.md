@@ -1,8 +1,14 @@
 # PassForge — KDE Plasma 6
 
-PassForge is a KDE Plasma 6 widget that generates secure passwords and memorable passphrases. It provides two generators in a native Plasma interface, with configurable character sets, word selection, and password options.
+**PassForge** is a KDE Plasma 6 widget for generating secure passwords and memorable passphrases. It provides two generators in a native Plasma interface, with flexible character sets, word selection, and configurable generation options.
 
 PassForge uses Qt's system-backed cryptographic random number generator through a small C++ QML module named `OpenSquares.PassForge`.
+
+<p align="center">
+  <img src="contents/screenshots/password-generator.png" alt="PassForge password generator" width="400">
+  <img src="contents/screenshots/passphrase-generator.png" alt="PassForge passphrase generator" width="400">
+  <img src="contents/screenshots/settings.png" alt="PassForge settings" width="500" height="500">
+</p>
 
 ## Features
 
@@ -14,187 +20,93 @@ PassForge uses Qt's system-backed cryptographic random number generator through 
   - Lowercase letters (`a-z`)
   - Numbers (`0-9`)
   - Special characters (`!@#$%^&*`)
-- Configure minimum numbers and special characters in each generated password.
-- Automatically shuffle generated characters to distribute required characters throughout the password.
-- Entropy estimation and a visual password-strength indicator.
-- Scrollable password display for longer passwords.
+- Configure minimum numbers and special characters.
+- Randomize character positions to distribute required characters throughout the password.
+- View estimated entropy and a visual password-strength indicator.
+- Scroll through longer generated passwords.
 - Copy generated passwords to the clipboard.
 
 ### Passphrase Generator
 
 - Generate passphrases using 2–12 randomly selected words.
-- Optional capitalization of the first letter of each word.
-- Optional single random digit (0–9) appended to one randomly selected word.
-- Configurable word separator, including `-`, `_`, `.`, a space, or no separator.
-- Entropy estimation and a visual password-strength indicator.
+- Optionally capitalize the first letter of each word.
+- Optionally append a random digit (0–9) to one randomly selected word.
+- Choose a word separator: hyphen (`-`), underscore (`_`), period (`.`), space, or none.
+- View estimated entropy and a visual password-strength indicator.
 - Copy generated passphrases to the clipboard.
 
-### General
+### Native Plasma Integration
 
-- Native KDE Plasma interface and widget integration.
-- Persistent settings through KDE's KConfig system.
-- Shared C++ cryptographic random number provider.
-- Integrated About, configuration, and help information.
+- Designed for KDE Plasma 6.
+- Integrates directly into the desktop or panel as a Plasma widget.
+- Persistent settings across sessions.
+- Configurable through the native Plasma settings interface.
 
-## Security and randomness
+## Security and Randomness
 
-PassForge uses Qt's `QRandomGenerator::system()` through its C++ QML module, `OpenSquares.PassForge`.
+PassForge uses Qt's `QRandomGenerator::system()` through its C++ QML module, `OpenSquares.PassForge`. This provides access to the operating system's cryptographically secure random number source.
 
-This uses the operating system's cryptographically secure random number source.
+- Password characters are selected using uniformly distributed random indices.
+- Required character types are generated separately to satisfy configured minimums.
+- A Fisher–Yates shuffle randomizes the final password character positions.
+- Passphrase words are selected independently from a bundled dictionary containing 7,776 words, sourced from the [Electronic Frontier Foundation (EFF) Dice-Generated Passphrase Wordlist](https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt).
+- Optional numeric suffixes use a random digit and a randomly selected word position.
 
-### Password generation
+PassForge also provides theoretical entropy estimates to help understand the strength of generated credentials. These estimates are not formal security guarantees and do not constitute an independent security audit.
 
-- Character selection uses uniformly distributed random indices.
-- Required numbers and special characters are generated separately to satisfy the configured minimum requirements.
-- Remaining characters are selected from the enabled character sets.
-- A Fisher–Yates shuffle randomizes the final character positions.
+**Keep generated passwords and passphrases private.** Clipboard managers may retain copied credentials in clipboard history.
 
-### Passphrase generation
-
-- The bundled word list contains 7,776 words.
-- Each word is selected independently using a uniformly distributed random index.
-- When enabled, one decimal digit (0–9) is appended to a randomly selected word.
-- Capitalization is deterministic and does not contribute additional entropy.
-- The separator is configurable but does not contribute entropy.
-
-### Entropy estimates
+## Entropy Estimates
 
 PassForge provides theoretical entropy estimates to help users understand the strength of generated passwords and passphrases.
 
-For passphrases, the estimate is based on independent word selections:
+### Passphrases
+
+The base entropy estimate is calculated from the number of independently selected words and the size of the wordlist:
 
 `wordCount × log₂(wordListSize)`
 
-When numeric suffixes are enabled, the estimate additionally accounts for the random digit and its randomly selected position.
+PassForge uses a bundled 7,776-word dictionary sourced from the [Electronic Frontier Foundation (EFF) Dice-Generated Passphrase Wordlist](https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt).
 
-For passwords, the estimate considers the enabled character pool, password length, and configured minimum character requirements.
+When numeric suffixes are enabled, the estimate additionally accounts for the random digit (10 possible values) and the randomly selected word position to which it is appended.
 
-These figures are estimates rather than formal security guarantees. They do not constitute an independent security audit of the generator.
+### Passwords
 
-Keep generated passwords and passphrases private. Be aware that clipboard managers may retain copied credentials in clipboard history.
+For passwords, the entropy estimate considers:
 
-## Requirements
+- The total number of enabled characters across the selected character sets.
+- The configured password length.
+- The minimum number of required numeric and special characters.
 
-- KDE Plasma 6
-- CMake 3.21 or newer
-- C++17-compatible compiler
-- Qt 6 development packages, including Core and Qml
-- Plasma 6 development/runtime environment
-- CMake build tools and Ninja or Make
+This accounts for the constraints placed on password generation rather than assuming every character can be selected from the entire enabled character pool without restrictions.
 
-## Build and install
+These figures are theoretical estimates based on the generator's selection process, not formal security guarantees. They do not constitute an independent security audit of the generator.
 
-Clone the repository and enter the project directory:
+## Download and Installation
 
-```bash
-git clone https://github.com/aaryanvangari/passforge.git
-cd passforge
-```
+### Download
 
-Build and install the generated QML module into the project directory:
+Get the latest stable PassForge release from GitHub:
 
-```bash
-./build-passforge.sh
-```
+**[Download PassForge — Latest Release](https://github.com/aaryanvangari/passforge/releases/latest)**
 
-The build script performs the following operations:
+Download the `.deb` package for your system from the latest release assets.
 
-1. Configures the CMake project.
-2. Builds the C++ QML module.
-3. Installs the generated plugin and QML module metadata into the project directory.
+### Install
 
-Install PassForge as a Plasma applet:
+On Debian or Ubuntu-based distributions, install the downloaded package using:
 
 ```bash
-kpackagetool6 --type Plasma/Applet --install .
+sudo apt install ./passforge_*_amd64.deb
 ```
 
-For subsequent updates:
-
-```bash
-kpackagetool6 --type Plasma/Applet --upgrade .
-```
-
-After installation, PassForge can be added to the desktop or panel through Plasma's widget browser.
+After installation, open Plasma's widget browser, search for **PassForge**, and add it to your desktop or panel.
 
 ## Development
 
-The project uses CMake and Qt's QML module system to build the native C++ random number provider.
+Interested in building PassForge from source or working on the project?
 
-The main development workflow is:
-
-```bash
-./build-passforge.sh
-```
-
-Then install or upgrade the Plasmoid:
-
-```bash
-kpackagetool6 --type Plasma/Applet --install .
-```
-
-For subsequent updates:
-
-```bash
-kpackagetool6 --type Plasma/Applet --upgrade .
-```
-
-To test the widget in a standalone window:
-
-```bash
-plasmawindowed com.opensquares.passforge
-```
-
-## Project structure
-
-```text
-passforge/
-├── CMakeLists.txt
-├── metadata.json
-├── build-passforge.sh
-├── README.md
-├── LICENSE
-├── src/
-│   ├── SecureRandom.h
-│   └── SecureRandom.cpp
-└── contents/
-    ├── screenshot.png
-    ├── config/
-    │   ├── config.qml
-    │   └── main.xml
-    └── ui/
-        ├── main.qml
-        ├── PasswordGenerator.qml
-        ├── PasswordGenerator.js
-        ├── PassphraseGenerator.qml
-        ├── PassphraseGenerator.js
-        ├── words.js
-        └── OpenSquares/
-            └── PassForge/
-                ├── qmldir
-                ├── libpassforge.so
-                ├── libpassforgeplugin.so
-                └── passforge.qmltypes
-```
-
-### Components
-
-| Component | Purpose |
-|---|---|
-| `metadata.json` | Plasmoid identity, metadata, author information and icon |
-| `CMakeLists.txt` | C++ QML module build and installation rules |
-| `src/` | C++ cryptographic random number provider |
-| `contents/ui/main.qml` | Main Plasma widget interface and generator tabs |
-| `contents/ui/PasswordGenerator.qml` | Password generator interface and configuration handling |
-| `contents/ui/PasswordGenerator.js` | Password generation, shuffling and entropy estimation |
-| `contents/ui/PassphraseGenerator.qml` | Passphrase generator interface and configuration handling |
-| `contents/ui/PassphraseGenerator.js` | Passphrase generation and entropy estimation |
-| `contents/ui/words.js` | Bundled 7,776-word dictionary |
-| `contents/config/` | Configuration interface and settings schema |
-| `contents/screenshot.png` | Widget preview displayed in Plasma's widget browser |
-| `contents/ui/OpenSquares/PassForge/` | Generated C++ QML plugin and module metadata |
-
-The QML module files are generated during the build and installation process.
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for the development environment, build instructions, testing workflow, packaging, and release process.
 
 ## License
 
@@ -204,8 +116,8 @@ PassForge is licensed under the **GNU General Public License v3.0 or later**.
 
 See [LICENSE](./LICENSE) for the full license text.
 
-## Support and bug reports
+## Support and Bug Reports
 
 For bug reports, feature requests, and questions, visit the [PassForge GitHub Issues](https://github.com/aaryanvangari/passforge/issues) page.
 
-Project website: [passforge.opensquares.in](https://passforge.opensquares.in)
+**Project website:** [passforge.opensquares.in](https://passforge.opensquares.in)
