@@ -355,4 +355,91 @@ Before publishing a new Debian release, verify the following:
 
 ---
 
+## 12. Automated GitHub Releases
+
+PassForge uses GitHub Actions to automate Debian package builds and publish releases on the repository's GitHub Releases page.
+
+The workflow is defined in:
+
+```text
+.github/workflows/release.yml
+```
+
+It is triggered whenever a Git tag matching `v*` is pushed.
+
+### Release requirements
+
+Before creating an official release:
+
+1. Complete development and test the Plasmoid locally using `plasmoidviewer`.
+2. Run the development build and verify the development installation.
+3. Update `debian/changelog` with the new version and release notes.
+4. Commit all intended changes.
+5. Ensure the Git working tree is clean.
+6. Push the release commit to `main`.
+
+The Debian changelog version must match the Git tag, excluding the leading `v`.
+
+For example:
+
+| Debian changelog version | Git tag |
+|---|---|
+| `1.0.0-5` | `v1.0.0-5` |
+
+### Triggering an official release
+
+After pushing the release commit to `main`, create and push the corresponding Git tag:
+
+```bash
+git tag v1.0.0-5
+git push origin v1.0.0-5
+```
+
+Pushing the tag triggers the GitHub Actions workflow.
+
+### What the workflow does
+
+The workflow:
+
+1. Checks out the tagged source.
+2. Sets up an Ubuntu 26.04 build environment.
+3. Installs the required build dependencies.
+4. Verifies that the Git tag matches `debian/changelog`.
+5. Runs `release-passforge.py` to build the Debian package.
+6. Verifies the generated SHA-256 checksum.
+7. Creates a GitHub Release.
+8. Uploads the `.deb` package and `.sha256` checksum as release assets.
+
+The published GitHub Release becomes the official distribution point for the Debian package.
+
+### Testing the release workflow
+
+The workflow can also publish test releases without using an official release version.
+
+Use a Debian version with a `~test` suffix:
+
+```text
+1.0.0-5~test1
+```
+
+For Git compatibility, use `-test` in the tag:
+
+```bash
+git tag v1.0.0-5-test1
+git push origin v1.0.0-5-test1
+```
+
+The workflow converts `-test` to `~test` when checking the Debian changelog version and marks the resulting GitHub Release as a prerelease.
+
+Test releases should be created from a temporary branch. Do not put test versions in the official `main` branch changelog.
+
+### Important notes
+
+- Always push the release commit before pushing its tag.
+- The tag must point to the exact commit intended for release.
+- Do not reuse an existing release tag.
+- A failed workflow must be resolved before considering the release published.
+- GitHub Actions uses the automatically provided `GITHUB_TOKEN`; no personal access token is required.
+- The local `release-passforge.py` script remains available for manual package builds and releases.
+
 **Release principle:** The Git repository is the source of truth. A Debian release is built from a clean, committed state, verified, and archived with its checksum. The resulting `.deb` can then be installed independently of the development environment.
