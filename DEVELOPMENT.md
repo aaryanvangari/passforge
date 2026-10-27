@@ -82,7 +82,15 @@ The `-a` option adds the Plasmoid to the viewer. The `.` specifies the current d
 
 This loads PassForge directly from the local repository, allowing developers to test their current source changes.
 
-### 3.3 Test and debug
+### 3.3 Take screenshots
+
+```bash
+plasmawindowed com.opensquares.passforge
+```
+
+This command loads the applet in a window and we can take screenshots easily using spectacle utility.
+
+### 3.4 Test and debug
 
 Use the viewer to check:
 
@@ -97,7 +105,7 @@ Keep the terminal open while testing to inspect QML warnings and errors.
 
 After modifying the source, close and relaunch `plasmoidviewer` if the changes are not reflected automatically.
 
-### 3.4 Development testing versus installed testing
+### 3.5 Development testing versus installed testing
 
 There are two different testing stages:
 
@@ -441,5 +449,83 @@ Test releases should be created from a temporary branch. Do not put test version
 - A failed workflow must be resolved before considering the release published.
 - GitHub Actions uses the automatically provided `GITHUB_TOKEN`; no personal access token is required.
 - The local `release-passforge.py` script remains available for manual package builds and releases.
+
+---
+
+## 13. Versioning and Release Numbers
+
+PassForge follows **Semantic Versioning (SemVer)** for its application version. The version format is:
+
+`MAJOR.MINOR.PATCH`
+
+Each component has a specific purpose:
+
+| Component | Increment when |
+|---|---|
+| MAJOR | Making incompatible changes that break existing behaviour or compatibility. |
+| MINOR | Adding new functionality in a backward-compatible manner. |
+| PATCH | Fixing bugs or making backward-compatible corrections. |
+
+### 13.1 Choosing the Application Version
+
+Use the following guidelines when deciding the next application version:
+
+- **PATCH:** Bug fixes, minor corrections, and other backward-compatible improvements.
+  - Example: `1.0.0` → `1.0.1`
+- **MINOR:** New features that preserve compatibility with existing functionality.
+  - Example: `1.0.0` → `1.1.0`
+- **MAJOR:** Changes that introduce breaking behaviour or incompatible changes.
+  - Example: `1.0.0` → `2.0.0`
+
+Do not increment version components arbitrarily. Choose the increment based on the changes included in the release.
+
+### 13.2 Debian Package Revision
+
+The Debian package version consists of the upstream application version followed by a Debian revision:
+
+`UPSTREAM_VERSION-DEBIAN_REVISION`
+
+For example:
+
+`1.0.0-5`
+
+Here:
+- `1.0.0` is the PassForge application version.
+- `5` is the Debian packaging revision.
+
+The Debian revision is incremented when publishing another Debian package for the same upstream application version, typically for packaging-related changes.
+
+When the upstream application version changes, the Debian revision normally starts again at `1`.
+
+Examples:
+
+| Debian package version | Meaning |
+|---|---|
+| `1.0.0-5` | Current release: application version `1.0.0`, Debian revision `5`. |
+| `1.0.0-6` | Another Debian package revision of application version `1.0.0`. |
+| `1.0.1-1` | First Debian package of application version `1.0.1`. |
+| `1.1.0-1` | First Debian package of application version `1.1.0`. |
+| `2.0.0-1` | First Debian package of application version `2.0.0`. |
+
+A code change does not automatically require a Debian revision increment. If the change is released as a new application version, choose the appropriate Semantic Versioning increment instead.
+
+### 13.3 Release Version and Git Tag
+
+The Debian changelog version is the source of truth for the package version.
+
+For official releases, the Git tag must match the complete Debian package version, prefixed with `v`.
+
+Examples:
+
+| Debian changelog version | Git release tag |
+|---|---|
+| `1.0.0-5` | `v1.0.0-5` |
+| `1.0.1-1` | `v1.0.1-1` |
+| `1.1.0-1` | `v1.1.0-1` |
+| `2.0.0-1` | `v2.0.0-1` |
+
+Always update the Debian changelog version before creating and pushing the corresponding release tag. Refer to [Section 12 — Automated GitHub Releases](#12-automated-github-releases) for the release procedure.
+
+---
 
 **Release principle:** The Git repository is the source of truth. A Debian release is built from a clean, committed state, verified, and archived with its checksum. The resulting `.deb` can then be installed independently of the development environment.
